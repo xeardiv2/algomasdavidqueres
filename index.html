@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canales Deportivos IPTV 1.2 · API Endpoint & Player</title>
+  <!-- Plyr CSS -->
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Fuentes -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter/400.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter/600.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk/700.css" />
+  <style>
+    :root {
+      --bg: #070d1a;
+      --panel: #0d1626;
+      --panel-2: #111c31;
+      --border: #1e2c45;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --cyan: #38bdf8;
+      --text: #e6edf7;
+      --muted: #8ea0bd;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    h1,h2,h3,h4 { font-family: 'Space Grotesk', sans-serif; }
+
+    header {
+      background: rgba(13,22,38,.85);
+      backdrop-filter: blur(10px);
+      padding: .85rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .brand { display: flex; align-items: center; gap: .8rem; }
+    .brand-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #0ea5e9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; color: #fff;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.4rem;
+      padding: 1.4rem;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+    @media (max-width: 1024px) { .container { grid-template-columns: 1fr; } }
+
+    /* API Form Panel */
+    .api-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.2rem;
+      margin-bottom: 1.4rem;
+    }
+    .api-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: end;
+      margin-top: 1rem;
+    }
+    .form-group { display: flex; flex-direction: column; gap: .4rem; }
+    .form-group label { font-size: .8rem; color: var(--muted); font-weight: 600; }
+    .form-control {
+      padding: .6rem .8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: .85rem;
+      outline: none;
+    }
+    .form-control:focus { border-color: var(--accent); }
+
+    .btn {
+      padding: .65rem 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border: none;
+      font-size: .85rem; transition: all .2s; font-family: inherit;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    /* Ejemplos de uso */
+    .examples-box {
+      margin-top: 1rem;
+      padding: .85rem;
+      background: var(--panel-2);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+    }
+    .examples-box h4 { font-size: .8rem; color: var(--cyan); margin-bottom: .5rem; }
+    .example-btn {
+      display: inline-block;
+      margin: .2rem .4rem .2rem 0;
+      padding: .25rem .55rem;
+      background: rgba(56,189,248,.1);
+      border: 1px solid rgba(56,189,248,.3);
+      color: var(--cyan);
+      border-radius: 5px;
+      font-size: .75rem;
+      cursor: pointer;
+      font-family: monospace;
+    }
+    .example-btn:hover { background: rgba(56,189,248,.25); }
+
+    /* Video Player */
+    .video-wrapper {
+      background: #000; border-radius: 14px; overflow: hidden;
+      border: 1px solid var(--border); aspect-ratio: 16 / 9; position: relative;
+    }
+    .video-wrapper video { width: 100%; height: 100%; }
+
+    /* Channel List */
+    .playlist-section {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      display: flex; flex-direction: column; overflow: hidden; max-height: 700px;
+    }
+    .channel-list { list-style: none; overflow-y: auto; flex: 1; }
+    .channel-item {
+      padding: .75rem 1rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; transition: background .2s;
+    }
+    .channel-item:hover { background: rgba(255,255,255,.04); }
+    .channel-item.active { background: rgba(37,99,235,.2); border-left: 4px solid var(--accent); }
+
+    /* API JSON Output View */
+    .api-output {
+      background: #040811; border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem; font-family: monospace; font-size: .75rem; color: var(--cyan);
+      max-height: 200px; overflow-y: auto; margin-top: 1rem; white-space: pre-wrap;
+    }
+
+    footer {
+      padding: 1rem 1.4rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: .8rem;
+      border-top: 1px solid var(--border);
+      background: rgba(13,22,38,.6);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon"><i class="fa-solid fa-code"></i></div>
+      <div>
+        <h1>Canales IPTV v1.2</h1>
+        <span style="font-size:.75rem; color:var(--muted);">API Endpoint con Filtros GET y Formulario</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div>
+      <!-- Panel de la API Endpoint -->
+      <section class="api-panel">
+        <h3><i class="fa-solid fa-filter"></i> Consulta de API Endpoint (Parámetros GET)</h3>
+        
+        <form id="api-filter-form" class="api-form">
+          <!-- Opción 0: Continente (mejor discriminación por región) -->
+          <div class="form-group">
+            <label for="continent">Continente</label>
+            <select id="continent" name="continent" class="form-control">
+              <option value="any">Cualquiera (Por defecto)</option>
+              <option value="america">América</option>
+              <option value="europe">Europa</option>
+              <option value="asia">Asia</option>
+              <option value="africa">África</option>
+              <option value="oceania">Oceanía</option>
+            </select>
+          </div>
+
+          <!-- Opción 1: Región / País (queda en apoyo a continente) -->
+          <div class="form-group">
+            <label for="region">Región o País</label>
+            <select id="region" name="region" class="form-control">
+              <option value="all">Todas las regiones (Por defecto)</option>
+              <option value="ar">Argentina</option>
+              <option value="es">España</option>
+              <option value="mx">México</option>
+              <option value="latin">Latinoamérica</option>
+            </select>
+          </div>
+
+          <!-- Opción 2: Preguntar si es Deportes -->
+          <div class="form-group">
+            <label for="is_sports">¿Categoría Deportes?</label>
+            <select id="is_sports" name="is_sports" class="form-control">
+              <option value="false">Cargar todos los canales (Por defecto)</option>
+              <option value="true">Solo canales de Deportes</option>
+            </select>
+          </div>
+
+          <!-- Opción 3: Nombre del canal o similar (INPUT SOLICITADO) -->
+          <div class="form-group">
+            <label for="channel_name">Nombre del canal o coincidencia</label>
+            <input type="text" id="channel_name" name="channel_name" class="form-control" placeholder="Ej: ESPN, TyC, Fox, TNT...">
+          </div>
+
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Consultar API</button>
+        </form>
+
+        <!-- Sección con ejemplos de cómo solicitar -->
+        <div class="examples-box">
+          <h4><i class="fa-solid fa-lightbulb"></i> Ejemplos de cómo solicitar a la API (Click para probar):</h4>
+          <span class="example-btn" onclick="applyExample('america','all', 'true', 'ESPN')">?continent=america&is_sports=true&channel_name=ESPN</span>
+          <span class="example-btn" onclick="applyExample('america','ar', 'false','')">?region=ar&is_sports=false</span>
+          <span class="example-btn" onclick="applyExample('any','all','true','')">?is_sports=true (Solo Deportes)</span>
+          <span class="example-btn" onclick="applyExample('any','all','false','Fox')">?channel_name=Fox</span>
+        </div>
+
+        <div id="json-response-wrapper" style="margin-top: 1rem; display: none;">
+          <label style="font-size: .75rem; color: var(--muted);">Respuesta JSON devuelta por el Endpoint (Fuentes y Links M3U):</label>
+          <pre class="api-output" id="json-response"></pre>
+        </div>
+      </section>
+
+      <!-- Reproductor HLS -->
+      <div class="video-wrapper">
+        <video id="player" controls playsinline></video>
+      </div>
+    </div>
+
+    <!-- Lista Filtrada -->
+    <aside class="playlist-section">
+      <div style="padding: 1rem; border-bottom: 1px solid var(--border); background: var(--panel-2);">
+        <h2>Canales Encontrados (<span id="channel-count">0</span>)</h2>
+      </div>
+      <ul class="channel-list" id="channel-list"></ul>
+    </aside>
+  </main>
+
+  <footer>
+    <!-- No publicidad ni links — solo scripts funcionales (David / 48.js) -->
+    <div id="footer-info">Servicio de prueba — interfaz pública. Scripts operativos quedan en /scripts/</div>
+  </footer>
+
+  <!-- Dependencias -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+
+  <!-- Placeholder para el script solicitado por David (colocar scripts reales en /scripts/) -->
+  <script src="/scripts/david.js" defer></script>
+  <!-- 48.js: script que usará el servicio para integraciones; debe residir en /scripts/48.js -->
+  <script src="/scripts/48.js" defer></script>
+
+  <script>
+    // URLs base de GitHub según la región solicitada (se pueden ampliar por continente)
+    const GITHUB_PRESETS = {
+      all: "https://iptv-org.github.io/iptv/index.m3u",
+      ar: "https://iptv-org.github.io/iptv/countries/ar.m3u",
+      es: "https://iptv-org.github.io/iptv/countries/es.m3u",
+      mx: "https://iptv-org.github.io/iptv/countries/mx.m3u",
+      latin: "https://iptv-org.github.io/iptv/countries/latin.m3u"
+    };
+
+    // Mapas básicos de continente a lista de presets (puedes ampliar con más fuentes)
+    const CONTINENT_MAP = {
+      any: ['all'],
+      america: ['ar','mx','latin','all'],
+      europe: ['es','all'],
+      asia: ['all'],
+      africa: ['all'],
+      oceania: ['all']
+    };
+
+    let cacheChannels = {};
+    let hlsPlayer = null;
+
+    // Parser de formato M3U
+    function parseM3U(text) {
+      const lines = text.split(/\r?\n/);
+      const channels = [];
+      let current = null;
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('#EXTINF:')) {
+          const name = trimmed.substring(trimmed.lastIndexOf(',') + 1).trim();
+          const groupMatch = trimmed.match(/group-title="([^"]*)"/);
+          const logoMatch = trimmed.match(/tvg-logo="([^\"]*)"/);
+
+          current = {
+            name: name,
+            group: groupMatch ? groupMatch[1] : 'General',
+            logo: logoMatch ? logoMatch[1] : ''
+          };
+        } else if (trimmed && !trimmed.startsWith('#')) {
+          if (current) {
+            current.m3u8 = trimmed;
+            channels.push(current);
+            current = null;
+          }
+        }
+      }
+      return channels;
+    }
+
+    // Intenta cargar listas por prioridad (continente -> region presets)
+    async function loadChannelsFor(continent, region) {
+      const sources = [];
+      const continentList = CONTINENT_MAP[continent] || ['all'];
+      // Prioridad: región si es válida, luego lista de continente
+      if (region && region !== 'all') sources.push(GITHUB_PRESETS[region]);
+      continentList.forEach(k => { if (GITHUB_PRESETS[k]) sources.push(GITHUB_PRESETS[k]); });
+      // Siempre incluir 'all' al final
+      if (!sources.includes(GITHUB_PRESETS.all)) sources.push(GITHUB_PRESETS.all);
+
+      for (const src of sources) {
+        if (!cacheChannels[src]) {
+          try {
+            const res = await fetch(src);
+            const text = await res.text();
+            cacheChannels[src] = parseM3U(text);
+          } catch (e) {
+            // ignore and try next source
+            console.warn('Error loading', src, e);
+          }
+        }
+      }
+
+      // merge all loaded channels (dedupe by name+url)
+      const merged = [];
+      const seen = new Set();
+      sources.forEach(src => {
+        const list = cacheChannels[src] || [];
+        list.forEach(ch => {
+          const key = (ch.name + '|' + ch.m3u8);
+          if (!seen.has(key)) { seen.add(key); merged.push(ch); }
+        });
+      });
+      return merged;
+    }
+
+    // HANDLER PRINCIPAL DE "API" FRONTEND
+    async function apiEndpointHandler(params) {
+      const continent = params.get('continent') || 'any';
+      const region = params.get('region') || 'all';
+      const isSports = params.get('is_sports') === 'true';
+      const channelName = (params.get('channel_name') || '').toLowerCase().trim();
+
+      const channelsList = await loadChannelsFor(continent, region);
+
+      // Aplicar Filtros:
+      let filtered = channelsList.filter(ch => {
+        const isSportChannel = (ch.group || '').toLowerCase().includes('sport') || (ch.name || '').toLowerCase().includes('sport');
+        const matchSports = isSports ? isSportChannel : true;
+        const matchName = channelName ? ch.name.toLowerCase().includes(channelName) : true;
+
+        return matchSports && matchName;
+      });
+
+      return {
+        status: 200,
+        total_found: filtered.length,
+        params_received: { continent, region, is_sports: isSports, channel_name: channelName || null },
+        channels: filtered.map(c => ({ channel_name: c.name, group: c.group, m3u8_link: c.m3u8, logo: c.logo }))
+      };
+    }
+
+    // Renderizar resultados en pantalla y JSON de respuesta
+    function renderResults(apiResponse) {
+      const listEl = document.getElementById('channel-list');
+      const countEl = document.getElementById('channel-count');
+      const jsonEl = document.getElementById('json-response');
+      const jsonWrapper = document.getElementById('json-response-wrapper');
+
+      listEl.innerHTML = '';
+      jsonWrapper.style.display = 'block';
+      jsonEl.textContent = JSON.stringify(apiResponse, null, 2);
+
+      if (apiResponse.status !== 200 || !apiResponse.channels) {
+        countEl.textContent = '0';
+        listEl.innerHTML = '<li style="padding:1rem; color:var(--muted);">Sin canales encontrados para esta consulta.</li>';
+        return;
+      }
+
+      countEl.textContent = apiResponse.total_found;
+
+      apiResponse.channels.forEach((ch) => {
+        const li = document.createElement('li');
+        li.className = 'channel-item';
+        li.innerHTML = `
+          <div>
+            <strong>${escapeHtml(ch.channel_name)}</strong>
+            <br><small style="color:var(--muted);">${escapeHtml(ch.group)}</small>
+          </div>
+          <i class="fa-solid fa-play"></i>
+        `;
+        li.addEventListener('click', () => playStream(ch.m3u8_link, li));
+        listEl.appendChild(li);
+      });
+
+      if (apiResponse.channels.length > 0) {
+        playStream(apiResponse.channels[0].m3u8_link, listEl.children[0]);
+      }
+    }
+
+    // Simple escaping to avoid injection when rendering
+    function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]); }
+
+    // Reproductor de Video
+    function playStream(url, element) {
+      const video = document.getElementById('player');
+      document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
+      if (element) element.classList.add('active');
+
+      if (!url) return;
+
+      if (hlsPlayer) { try { hlsPlayer.destroy(); } catch(e){} hlsPlayer = null; }
+
+      if (Hls.isSupported()) {
+        hlsPlayer = new Hls();
+        hlsPlayer.loadSource(url);
+        hlsPlayer.attachMedia(video);
+        hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.play().catch(() => {});
+      }
+
+      // Expose last played to window so external script (48.js) can access
+      window.__lastPlayed = url;
+      if (typeof window.onChannelPlay === 'function') {
+        try { window.onChannelPlay(url); } catch(e) { console.warn(e); }
+      }
+    }
+
+    // Función auxiliar para probar ejemplos predefinidos
+    async function applyExample(continent, region, isSports, channelName) {
+      document.getElementById('continent').value = continent;
+      document.getElementById('region').value = region || 'all';
+      document.getElementById('is_sports').value = isSports;
+      document.getElementById('channel_name').value = channelName;
+
+      const params = new URLSearchParams({ continent, region: region || 'all', is_sports: isSports, channel_name: channelName });
+      window.history.pushState({}, '', '?' + params.toString());
+      const res = await apiEndpointHandler(params);
+      renderResults(res);
+    }
+
+    // Inicialización al cargar la página
+    document.addEventListener('DOMContentLoaded', async () => {
+      new Plyr('#player');
+
+      // Obtener parámetros GET enviados por la URL (si existen)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('continent')) document.getElementById('continent').value = urlParams.get('continent');
+      if (urlParams.has('region')) document.getElementById('region').value = urlParams.get('region');
+      if (urlParams.has('is_sports')) document.getElementById('is_sports').value = urlParams.get('is_sports');
+      if (urlParams.has('channel_name')) document.getElementById('channel_name').value = urlParams.get('channel_name');
+
+      // Ejecutar consulta inicial
+      const response = await apiEndpointHandler(urlParams);
+      renderResults(response);
+
+      // Evento de submit del formulario
+      document.getElementById('api-filter-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const searchParams = new URLSearchParams(formData);
+
+        // Actualizar URL sin recargar la página
+        window.history.pushState({}, '', '?' + searchParams.toString());
+
+        const res = await apiEndpointHandler(searchParams);
+        renderResults(res);
+      });
+
+      // Exponer API JS mínimo para que /scripts/48.js pueda usarlo
+      window.requestChannel = async function(opts) {
+        // opts: { continent, region, is_sports, channel_name }
+        const params = new URLSearchParams(opts || {});
+        const res = await apiEndpointHandler(params);
+        return res;
+      };
+
+      // David requested footer script: expose a hook
+      window.onDavidRequest = window.onDavidRequest || function(payload) { console.log('David hook called', payload); };
+
+    });
+
+    // Nota: Para garantizar que la IP visitante sea humana se necesita validación server/edge (Turnstile / reCAPTCHA / Worker).
+    // Este frontend puede integrarse con una Cloudflare Worker o un endpoint que valide un token captcha antes de devolver streams.
+  </script>
+
+</body>
+</html>
