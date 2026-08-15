@@ -19,8 +19,103 @@
 
 		<link rel="stylesheet" href="/normalize.css" />
 		<link rel="stylesheet" href="/dist/index.css" />
+
+		<!-- Añadido: Plyr, FontAwesome y fuentes (desde el fragmento proporcionado) -->
+		<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter/400.css" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter/500.css" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter/600.css" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter/700.css" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk/500.css" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk/700.css" />
+
+		<style>
+		  /* ===== 1.1 · Nuevas variables y ajustes ===== */
+		  :root {
+		    --bg: #070d1a;
+		    --panel: #0d1626;
+		    --panel-2: #111c31;
+		    --border: #1e2c45;
+		    --accent: #2563eb;
+		    --accent-hover: #1d4ed8;
+		    --cyan: #38bdf8;
+		    --text: #e6edf7;
+		    --muted: #8ea0bd;
+		    --danger: #ef4444;
+		    --success: #22c55e;
+		    --plyr-color-main: #2563eb;
+		  }
+		  * { box-sizing: border-box; margin: 0; padding: 0; }
+		  html, body { height: 100%; }
+		  body {
+		    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+		    background: radial-gradient(1100px 500px at 85% -10%, rgba(37,99,235,.14), transparent 60%),
+		                radial-gradient(900px 420px at -10% 110%, rgba(56,189,248,.08), transparent 60%),
+		                var(--bg);
+		    color: var(--text);
+		    min-height: 100vh;
+		    display: flex;
+		    flex-direction: column;
+		  }
+		  h1,h2,h3 { font-family: 'Space Grotesk', 'Inter', sans-serif; }
+
+		  /* ===== HEADER ===== */
+		  header {
+		    position: sticky; top: 0; z-index: 60;
+		    background: rgba(13,22,38,.85);
+		    backdrop-filter: blur(10px);
+		    padding: .85rem 1.5rem;
+		    border-bottom: 1px solid var(--border);
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    flex-wrap: wrap;
+		    gap: .9rem;
+		  }
+		  .brand { display: flex; align-items: center; gap: .8rem; }
+		  .brand-icon {
+		    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+		    background: linear-gradient(135deg, var(--accent), #0ea5e9);
+		    display: flex; align-items: center; justify-content: center;
+		    font-size: 1.25rem; color: #fff;
+		    box-shadow: 0 6px 18px -6px rgba(37,99,235,.55);
+		  }
+		  .brand-text h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: .2px; }
+		  .brand-text span { font-size: .75rem; color: var(--muted); }
+		  .topbar-actions { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+
+		  .btn {
+		    padding: .6rem 1.1rem; border-radius: 9px; cursor: pointer; font-weight: 600;
+		    display: inline-flex; align-items: center; gap: .5rem; border: none;
+		    font-size: .85rem; font-family: inherit; transition: all .2s ease;
+		  }
+		  .btn-primary { background: linear-gradient(135deg, var(--accent), #1e7ae8); color: #fff; box-shadow: 0 5px 16px -6px rgba(37,99,235,.6); }
+		  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+		  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+		  .btn-ghost:hover { color: var(--text); border-color: #33507e; background: rgba(255,255,255,.04); }
+		  .btn-cyan { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #fff; box-shadow: 0 5px 16px -6px rgba(14,165,233,.55); }
+		  .btn-cyan:hover { background: #0284c7; transform: translateY(-1px); }
+		  input[type="file"] { display: none; }
+
+		  /* (El resto de estilos del fragmento se han integrado arriba para mantener la apariencia) */
+		</style>
 	</head>
 	<body>
+		<!-- Header integrado (fragmento proporcionado). Mantengo el título "Globe" y el #root para la app. -->
+		<header>
+		  <div class="brand">
+		    <div class="brand-icon"><i class="fa-solid fa-trophy"></i></div>
+		    <div class="brand-text">
+		      <h1>Canales Deportivos IPTV 1.1</h1>
+		      <span>Por país · Actualizado automáticamente</span>
+		    </div>
+		  </div>
+		  <div class="topbar-actions">
+		    <button id="reset-btn" class="btn btn-ghost" title="Restablecer lista demo"><i class="fa-solid fa-rotate-left"></i> Restablecer</button>
+		  </div>
+		</header>
+
 		<div id="root">Loading...</div>
 		<script type="module" src="/dist/index.js"></script>
 	</body>
